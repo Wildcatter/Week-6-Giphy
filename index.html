@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css" integrity="sha384-MIwDKRSSImVFAZCVLtU0LMDdON6KVCrZHyVQQj6e8wIEJkW4tvwqXrbMIya1vriY" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-2.2.3.js" integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4=" crossorigin="anonymous"></script>
+	<style>
+		.picDivs {display: inline-block; height:250px; width:250px}
+		.buttons{margin: 25px;}
+		.topicButton{margin: 10px}
+	</style>
+</head>
+<body>
+	<div class="container-fluid main"">
+		<div class="row buttons">
+		</div>
+		<div class="row">
+			<div class="col-sm-10 pictureDiv">
+			</div>
+			<div class="col-sm-2">
+				<label id="labelStyle"> Add a topic. Any topic. </label>
+				<input type="text" id="userTopic"><br>
+				<input id="submit" type="submit" value="submit">
+			</div>
+		</div>
+	</div>
+
+<script>
+var btnNumber=0;
+var topics = ["macgruber", "beer", "petroleum", "money", "guns"];
+var url = "http://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC";
+
+
+window.onload = function(){
+	for (each in topics) {
+		btnNumber++;
+		let it = $('<button>');
+		// it.attr("id", [each]);
+		it.addClass("btn btn-primary btn-lg topicButton");
+		it.text(topics[each]);
+		$(".buttons").append(it);
+	};
+};
+
+$(document).on("click", ".topicButton", function(){
+	btnNumber++;
+	$(".pictureDiv").empty();
+	var searchPhrase = $(this).text();
+	console.log(searchPhrase);
+
+	$.ajax({
+		url: url, 
+		method: "GET",
+		data: {
+			q: searchPhrase,
+			limit: "10",
+			rating: "",
+		}
+
+	}).done(function(response) {
+	
+		console.log(response.data[0]);
+		console.log(response.data[0].images.downsized.url);
+		for (i=0;i<10;i++) {
+			let getRating = response.data[i].rating;
+			let  divsyo = $('<div class="picDivs"><h3 class = "labels"> Rating: ' + getRating + '</h3></div>');
+			$(".pictureDiv").append(divsyo);
+			$(divsyo).append('<img src="' + response.data[i].images.fixed_width_still.url + '" id="'+[i]+'" class="img-responsive img-circle picture">');
+			$("#"+[i]).attr("data-still", response.data[i].images.fixed_width_still.url);
+			$("#"+[i]).attr("data-animate", response.data[i].images.fixed_width_downsampled.url);
+			$("#"+[i]).attr("data-state", "still");
+	};
+});
+});
+
+$(document).on("click", ".picture", function() {
+	var state = $(this).attr('data-state'); 
+	 if (state == 'still'){
+                $(this).attr('src', $(this).data('animate'));
+                $(this).attr('data-state', 'animate');
+            }else{
+                $(this).attr('src', $(this).data('still'));
+                $(this).attr('data-state', 'still');
+            };
+});
+
+
+$("#submit").on("click", function() {
+	let create = $("#userTopic").val();
+	var userButton = $('<button>');
+	userButton.addClass("btn btn-primary btn-lg topicButton");
+	userButton.text(create);
+	$(".buttons").append(userButton);
+});
+
+
+</script>
+</body>
+</html>
+
